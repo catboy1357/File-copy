@@ -13,6 +13,9 @@ namespace File_copy
 
         public static void Main(string[] args)
         {
+            File.AppendAllText(@".\info.log", "\n\n");
+            OutputMsg( ConsoleColor.Cyan, "[Info] ", $"Starting: {DateTime.Now}");
+
             StartChecks(args);
 
             MoveFiles();
@@ -106,7 +109,9 @@ namespace File_copy
                     if (ex.Message.Contains("already exists"))
                     {
                         OutputMsg(
-                            ConsoleColor.Yellow, "[File] ", $"File already exists. Removing Duplicates: {Path.GetFileName(File)}"
+                            ConsoleColor.Yellow, 
+                            "[File] ", 
+                            $"File already exists. Removing Duplicates: {Path.GetFileName(File)}"
                         );
                         System.IO.File.Delete(File);
                     }
@@ -126,6 +131,11 @@ namespace File_copy
 
             Console.ForegroundColor = originalColor;
             Console.WriteLine (message);
+
+            File.AppendAllText(
+                @".\info.log",
+                $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} {statusMessage} {message} \n"
+            );
         }
     }
 }

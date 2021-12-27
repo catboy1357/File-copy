@@ -32,7 +32,7 @@ namespace File_copy
                 watcher.EnableRaisingEvents = true;
     
                 // Wait for the user to quit the program.
-                Program.OutputMsg(ConsoleColor.Blue, "[Info] ", "Press 'q' to stop listening.");
+                Program.OutputMsg(ConsoleColor.Cyan, "[Info] ", "Press 'q' to stop listening.");
                 while (Console.Read() != 'q') ;
     
                 watcher.EnableRaisingEvents = false;
