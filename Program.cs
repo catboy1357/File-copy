@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace File_copy
+﻿namespace File_copy
 {
     public class Program
     {
@@ -84,6 +81,12 @@ namespace File_copy
         {
             foreach (String File in Files)
             {
+                if (File.Contains("~") || File.Contains("$"))
+                {
+                    OutputMsg(ConsoleColor.Yellow, "[Log ] ", $"Skip Temp: {File} is a temp file");
+                    continue;
+                }
+
                 OutputMsg(
                     ConsoleColor.Blue, "[File] ", $"Located: {File}"
                 );
