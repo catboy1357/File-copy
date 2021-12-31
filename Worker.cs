@@ -22,10 +22,13 @@ namespace File_copy
                 watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
                    | NotifyFilters.FileName | NotifyFilters.DirectoryName;
                 watcher.Filter = "*.*";
+
+                // filters out the temporary files created by the OS
+                watcher.IncludeSubdirectories = true;
     
                 // Add event handlers.
                 watcher.Created += new FileSystemEventHandler(OnChanged);
-                // watcher.Changed += new FileSystemEventHandler(OnChanged);
+                watcher.Changed += new FileSystemEventHandler(OnChanged);
                 // watcher.Deleted += new FileSystemEventHandler(OnChanged);
                 // watcher.Renamed += new RenamedEventHandler(OnRenamed);
                 
@@ -43,8 +46,7 @@ namespace File_copy
         }
     
         private void OnChanged(object sender, FileSystemEventArgs e)
-        {
-            // Specify what is done when a file is changed, created, or deleted.
+        {            
             Program.OutputMsg(ConsoleColor.Blue, "[Info] ", $"File Moved: {e.FullPath} {e.ChangeType} to {Program.destination}");
             Program.Files = Directory.GetFiles(Program.source ?? throw new ArgumentNullException(nameof(Program.source)));
             Program.MoveFiles();  

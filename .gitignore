@@ -112,6 +112,9 @@ temp 2
 
 #Build artifacts
 output/*
+!output/file copy.dll
+!output/file copy.exe
+!output/file copy.pdb
 
 # User-specific files
 *.suo

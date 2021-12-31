@@ -7,12 +7,10 @@
 
         public static string[] Files;
 
+        public static bool Debug = true;
 
         public static void Main(string[] args)
         {
-            File.AppendAllText(@".\info.log", "\n\n");
-            OutputMsg( ConsoleColor.Cyan, "[Info] ", $"Starting: {DateTime.Now}");
-
             StartChecks(args);
 
             MoveFiles();
@@ -21,6 +19,9 @@
 
         private static void StartChecks(string[] args)
         {
+            File.AppendAllText(@".\info.log", "\n\n");
+            OutputMsg( ConsoleColor.Cyan, "[Info] ", $"Starting: {DateTime.Now}");
+
             if (args.Length == 2)
             {
                 source = args[0];
@@ -28,9 +29,15 @@
                 Files = Directory.GetFiles(source);
 
             }
+            else if (Debug)
+            {
+                source = @"D:\Programing\File copy\temp 2";
+                destination = @"D:\Programing\File copy\temp 1";
+                Files = Directory.GetFiles(source);
+            }
             else if (args.Length == 0)
             {
-                OutputMsg(ConsoleColor.Blue, "[None] ", "No files to copy");
+                OutputMsg(ConsoleColor.Blue, "[None] ", "No files to Move");
 
                 OutputMsg(ConsoleColor.Blue, "[Info] ", "Please enter source");
                 source = Console.ReadLine().ToString();
@@ -77,31 +84,35 @@
                     services.AddHostedService<Worker>();
                 });
 
-        public static void MoveFiles()
+        public static void MoveFiles(bool IsComplete = true)
         {
+            int MoveCount = 0;
             foreach (String File in Files)
             {
-                if (File.Contains("~") || File.Contains("$"))
+                MoveCount++;
+
+                if (IsComplete)
+                OutputMsg(
+                    ConsoleColor.Blue, "[File] ", $"Located: New file found {File}"
+                );
+
+                if (File.Contains(".tmp".ToLower()) || File.Contains("~") || File.Contains("$"))
                 {
-                    OutputMsg(ConsoleColor.Yellow, "[Log ] ", $"Skip Temp: {File} is a temp file");
+                    OutputMsg(ConsoleColor.Yellow, "[Log ] ", $"Skip Temp: '{Path.GetFileName(File)}' is a temp file");
+                    MoveCount--;
                     continue;
                 }
 
-                OutputMsg(
-                    ConsoleColor.Blue, "[File] ", $"Located: {File}"
-                );
                 try
                 {
-                    System.IO.File.Copy(
+                    System.IO.File.Move(
                         File,
                         Path.Combine(destination , Path.GetFileName(File)),
                         false
                     );
 
-                    System.IO.File.Delete(File);
-
                     OutputMsg(
-                        ConsoleColor.Green, "[Copy] ", $"Coppied: {File}"
+                        ConsoleColor.Green, "[Move] ", $"Moved: {File}"
                     );
                 }
                 catch (System.IO.IOException ex)
@@ -111,19 +122,86 @@
                     );
                     if (ex.Message.Contains("already exists"))
                     {
-                        OutputMsg(
-                            ConsoleColor.Yellow, 
-                            "[File] ", 
-                            $"File already exists. Removing Duplicates: {Path.GetFileName(File)}"
-                        );
-                        System.IO.File.Delete(File);
+                        UpdateFile(File, destination);
                     }
+
                 }
             }
 
+            if (IsComplete)
             OutputMsg(
-                ConsoleColor.Green, "[Done] ", "Compleated: All files have been copied"
+                ConsoleColor.Green, "[Info] ", $"Completed: {MoveCount} files moved, {Files.Length - MoveCount} files Skipped"
             );
+        }
+
+        private static void UpdateFile(string File, string Destination)
+        {
+            OutputMsg (ConsoleColor.Yellow, "[Log ] ", $"Info: '{Path.GetFileName(File)}' already exists changing name");
+            string[] _Destination = Directory.GetFiles(Destination);
+
+            string FileName = Path.GetFileNameWithoutExtension(File);
+            string Extension = Path.GetExtension(File);
+            string FilePath = File.Split('.')[0];
+
+            foreach (string item in _Destination)
+            {
+                if (item.Contains(Path.GetFileName(File)))
+                {                    
+                    if (Regex.IsMatch(_Destination[0], @"\([0-9]+\)"))
+                    {
+                        // find the biggest number in _Destination
+                        int BiggestNum = 0;
+                        for (int i = 0; i < _Destination.Length; i++)
+                        {
+                            if (Regex.IsMatch(_Destination[i], @"\([0-9]+\)"))
+                            {
+                                // contine if the file is different then the current file name
+                                if (Path.GetFileName(_Destination[i].Split(" (")[0]) != Path.GetFileName(File).Split(".")[0])
+                                {
+                                    continue;
+                                }
+                                
+
+                                int Number = Convert.ToInt32(Regex.Match(_Destination[i], @"\([0-9]+\)").Value.Replace("(", "").Replace(")", ""));
+                                if (Number > BiggestNum)
+                                {
+                                    BiggestNum = Number;
+                                }
+                            }
+                        }
+                        BiggestNum++;
+
+                        OutputMsg(
+                            ConsoleColor.Yellow, "[Edit] ", $"Renamed: {Path.GetFileName(File)} to {FileName + Extension}"
+                        );
+
+                        // rename the file to file_ + number + extension
+                        System.IO.File.Move(
+                            File,
+                            Path.Combine(FilePath + " (" + BiggestNum + ")" + Extension),
+                            false
+                        );
+
+                        Program.Files = Directory.GetFiles(source);
+                        MoveFiles(false);
+                    }
+                    else
+                    {
+                        OutputMsg(
+                            ConsoleColor.Yellow, "[Edit] ", $"Renamed: '{Path.GetFileName(File)}' to '{FileName + Extension}'"
+                        );
+                        // rename the file to file_ + number + extension
+                        System.IO.File.Move(
+                            File,
+                            Path.Combine(FilePath + " (1)" + Extension),
+                            false
+                        );
+
+                        Program.Files = Directory.GetFiles(source);
+                        MoveFiles(false);
+                    }
+                }
+            }
         }
 
         public static void OutputMsg(ConsoleColor colour, string statusMessage, string message)
