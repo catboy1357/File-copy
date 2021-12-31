@@ -47,9 +47,6 @@ namespace File_copy
     
         private void OnChanged(object sender, FileSystemEventArgs e)
         {            
-            Program.OutputMsg(ConsoleColor.Blue, "[Info] ", $"File Moved: {e.FullPath} {e.ChangeType} to {Program.destination}");
-            Program.Files = Directory.GetFiles(Program.source ?? throw new ArgumentNullException(nameof(Program.source)));
-
             // check if the file is still changing size with a while loop
             while (true)
             {
@@ -61,6 +58,9 @@ namespace File_copy
 
                 else break;
             }
+            
+            Program.OutputMsg(ConsoleColor.Blue, "[Info] ", $"File Moved: {e.FullPath} {e.ChangeType} to {Program.destination}");
+            Program.Files = Directory.GetFiles(Program.source ?? throw new ArgumentNullException(nameof(Program.source)));
 
             Program.MoveFiles();  
         }

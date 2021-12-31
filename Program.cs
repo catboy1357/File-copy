@@ -96,7 +96,9 @@
                     ConsoleColor.Blue, "[File] ", $"Located: New file found {File}"
                 );
 
-                if (File.Contains(".tmp".ToLower()) || File.Contains("~") || File.Contains("$"))
+                string FullPath = Path.GetFullPath(File);
+
+                if (FullPath.Contains(".tmp".ToLower()) || FullPath.Contains("~") || FullPath.Contains("$"))
                 {
                     OutputMsg(ConsoleColor.Yellow, "[Log ] ", $"Skip Temp: '{Path.GetFileName(File)}' is a temp file");
                     MoveCount--;
