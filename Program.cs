@@ -7,7 +7,7 @@
 
         public static string[] Files;
 
-        public static bool Debug = true;
+        public static bool Debug = false;
 
         public static void Main(string[] args)
         {
