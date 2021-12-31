@@ -49,6 +49,19 @@ namespace File_copy
         {            
             Program.OutputMsg(ConsoleColor.Blue, "[Info] ", $"File Moved: {e.FullPath} {e.ChangeType} to {Program.destination}");
             Program.Files = Directory.GetFiles(Program.source ?? throw new ArgumentNullException(nameof(Program.source)));
+
+            // check if the file is still changing size with a while loop
+            while (true)
+            {
+                var fileSize = new FileInfo(e.FullPath).Length;
+                Thread.Sleep(1000);
+
+                if (fileSize != new FileInfo(e.FullPath).Length) 
+                continue;
+
+                else break;
+            }
+
             Program.MoveFiles();  
         }
     }
